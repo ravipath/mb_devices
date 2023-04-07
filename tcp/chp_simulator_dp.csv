@@ -1,0 +1,18 @@
+integrate;key;address;function_code;registers;format;byte_order;unit;scale_factor;interval;labels
+1;WZ Waermemenge;0;3;2;INT32;CDAB;kWh;1;15s;
+1;WZ Volumen;2;3;2;INT32;CDAB;m3;1;15s;
+1;WZ Leistung;4;3;2;INT32;CDAB;kW;1;15s;
+1;Waermemenge 1.UED;6;3;2;INT32;CDAB;none;1;15s;
+1;WZ Seriennummer;8;3;2;INT32;CDAB;none;1;15s;
+1;WZ Durchfluss;10;3;2;INT32;CDAB;m3/h;1000;15s;
+1;Fehleranzeige;12;3;1;INT16;ABCD;none;1;15s;
+1;WZ Ruecklauftemp.;13;3;1;INT16;ABCD;Celcius;100;15s;
+1;WZ Vorlauftemp;14;3;1;INT16;ABCD;Celcius;100;15s;
+1;WZ Spreizung;15;3;1;INT16;ABCD;Celcius;100;15s;
+1;Betriebstage;16;3;1;INT16;ABCD;d;1;15s;
+1;Fehltage;17;3;1;INT16;ABCD;d;1;15s;
+1;Auslesefehler;18;3;1;INT16;ABCD;none;1;15s;
+1;WMZ Type;19;3;1;INT16;ABCD;none;1;15s;
+1;TEST_WRITE_I16;20;6;1;INT16;ABCD;number;1;15s;
+1;TEST_WRITE_I32;21;6;2;INT32;ABCD;number;1;15s;
+1;TEST_WRITE_F32;23;6;2;FLOAT32;ABCD;number;1;15s;
