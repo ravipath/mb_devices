@@ -19,6 +19,7 @@ typedef enum
 typedef struct mb_tcp_client_config
 {
     char *ip;
+    uint32_t unit_id;
     uint32_t port;
 } mb_tcp_client_config_t;
 
@@ -47,7 +48,9 @@ uint32_t calc_num_modbus_registers(void);
 void free_allocated_spaces(void);
 uint8_t get_num_dp(void);
 uint32_t read_mb_register(uint8_t address, uint8_t length);
+float read_mb_register_f32(uint8_t address, uint8_t length);
 void write_mb_register(uint16_t offset, uint8_t num_regs, uint32_t data);
+void write_mb_register_float32(uint16_t offset, float data);
 void *simulator_worker(void *ptr);
 void *rtu_worker(void *ptr);
 

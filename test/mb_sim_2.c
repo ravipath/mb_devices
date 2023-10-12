@@ -16,61 +16,9 @@ static char *elements[] = {"NAME", "ADDRESS", "REGISTER", "FORMAT", "VALUE", "UN
 //static mb_device_data_map_t mb_data_map2[15] = {0};
 
 static mb_device_data_map_t mb_data_map[] = {
-    {.start_addr = 0, .datatype = "INT32", .format = "CDAB", .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 78200, .step = 20},
-    {.start_addr = 2, .datatype = "INT32", .format = "CDAB", .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 56830, .step = 1},
-    {.start_addr = 4, .datatype = "INT32", .format = "CDAB", .dp_value_range = RANGE, .max_value = 436, .min_value = 177, .value.i_data = -1, .step = -1},
-    {.start_addr = 6, .datatype = "INT32", .format = "CDAB", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 8, .datatype = "INT32", .format = "CDAB", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 3241, .step = -1},
-    {.start_addr = 10, .datatype = "INT32", .format = "CDAB", .dp_value_range = RANGE, .max_value = 16, .min_value = 8, .value.i_data = -1, .step = -1},
-    {.start_addr = 12, .datatype = "INT16", .format = "ABCD", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 13, .datatype = "INT16", .format = "ABCD", .dp_value_range = RANGE, .max_value = 52, .min_value = 50, .value.i_data = -1, .step = -1},
-    {.start_addr = 14, .datatype = "INT16", .format = "ABCD", .dp_value_range = RANGE, .max_value = 74, .min_value = 72, .value.i_data = -1, .step = -1},
-    {.start_addr = 15, .datatype = "INT16", .format = "ABCD", .dp_value_range = RANGE, .max_value = 23, .min_value = 21, .value.i_data = -1, .step = -1},
-    {.start_addr = 16, .datatype = "INT16", .format = "ABCD", .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 4600, .step = 1},
-    {.start_addr = 17, .datatype = "INT16", .format = "ABCD", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 18, .datatype = "INT16", .format = "ABCD", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 19, .datatype = "INT16", .format = "ABCD", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 45, .step = -1},
+    {.start_addr = 0, .datatype = "INT16", .format = "ABCD", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 201, .step = -1},
+    {.start_addr = 1, .datatype = "INT16", .format = "ABCD", .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 202, .step = -1},
 };
-
-/*void create_mb_data_map(void){
-    mb_device_t *head = get_head();
-    mb_device_t *temp = head;
-    int counter = 0;
-
-    while (temp != NULL){
-        mb_data_map2[counter].start_addr = temp->start_address;
-        mb_data_map2[counter].datatype = temp->start_address;
-        mb_data_map2[counter].format = temp->start_address;
-        mb_data_map2[counter].dp_value_range = temp->start_address;
-        mb_data_map2[counter].max_value = temp->start_address;
-        mb_data_map2[counter].min_value = temp->start_address;
-        mb_data_map2[counter].value = temp->start_address;
-        mb_data_map2[counter].step = temp->start_address;
-    }
-
-
-
-}*/
-
-/*static mb_device_data_map_t mb_data_map[] = {
-    {.start_addr = 0, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value = 78200, .step = 20},
-    {.start_addr = 2, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value = 56830, .step = 1},
-    {.start_addr = 4, .dp_value_range = RANGE, .max_value = 436, .min_value = 177, .value = -1, .step = -1},
-    {.start_addr = 6, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value = 0, .step = -1},
-    {.start_addr = 8, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value = 84693176, .step = -1},
-    {.start_addr = 10, .dp_value_range = RANGE, .max_value = 16, .min_value = 8, .value = -1, .step = -1},
-    {.start_addr = 12, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value = 0, .step = -1},
-    {.start_addr = 13, .dp_value_range = RANGE, .max_value = 52, .min_value = 50, .value = -1, .step = -1},
-    {.start_addr = 14, .dp_value_range = RANGE, .max_value = 74, .min_value = 72, .value = -1, .step = -1},
-    {.start_addr = 15, .dp_value_range = RANGE, .max_value = 23, .min_value = 21, .value = -1, .step = -1},
-    {.start_addr = 16, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value = 4600, .step = 1},
-    {.start_addr = 17, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value = 0, .step = -1},
-    {.start_addr = 18, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value = 0, .step = -1},
-    {.start_addr = 19, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value = 45, .step = -1},
-    {.start_addr = 20, .dp_value_range = CONFIGURE, .max_value = -1, .min_value = -1, .value = -1, .step = -1},
-    {.start_addr = 21, .dp_value_range = CONFIGURE, .max_value = -1, .min_value = -1, .value = -1, .step = -1},
-    {.start_addr = 23, .dp_value_range = CONFIGURE, .max_value = -1, .min_value = -1, .value = -1, .step = -1},
-};*/
 
 size_t string_lengh(const char *s)
 {

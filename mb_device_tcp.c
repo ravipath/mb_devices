@@ -11,6 +11,8 @@
 #include "mb_device_tcp.h"
 #include "mb_sim.h"
 
+#define UNIT_ID 1
+
 #ifdef DEBUG
 #define DEBUG_PRINT(...)              \
     do                                \
@@ -38,6 +40,13 @@ void print_usage(void)
     fprintf(stderr, "          [-p] port (e.g., 501)\n");
 }
 
+float read_mb_register_f32(uint8_t address, uint8_t length)
+{
+    float real = modbus_get_float_abcd(modbus_register_map->tab_registers + address);
+    printf("REAL: %f\n", real);
+    return real;
+}
+
 uint32_t read_mb_register(uint8_t address, uint8_t length)
 {
     uint32_t data = 0;
@@ -56,6 +65,26 @@ uint32_t read_mb_register(uint8_t address, uint8_t length)
     }
 
     return data;
+}
+
+void write_mb_register_float32(uint16_t offset, float data)
+{
+    uint16_t *mb_reg_offset = modbus_register_map->tab_registers + offset;
+    float real;
+    modbus_set_float_badc(data, mb_reg_offset);
+    /*printf("set float %f at address %d\n", data, offset);
+
+    real = modbus_get_float_abcd(mb_reg_offset);
+    printf("get float(ABCD): %f at address %d\n", real);
+
+    real = modbus_get_float_badc(mb_reg_offset);
+    printf("get float(BADC): %f at address %d\n", real);
+
+    real = modbus_get_float_cdab(mb_reg_offset);
+    printf("get float(CDAB): %f at address %d\n", real);
+
+    real = modbus_get_float_dcba(mb_reg_offset);
+    printf("get float(DCBA): %f at address %d\n", real);*/
 }
 
 void write_mb_register(uint16_t offset, uint8_t num_regs, uint32_t data)
@@ -161,7 +190,6 @@ void insert_dev(mb_device_t *d)
 
     temp->nxt = d;
 }
-//            create_mb_device_elements(dev, line_index, tok);
 
 int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
 {
@@ -236,26 +264,6 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
     return r;
 }
 
-modbus_mapping_t *create_modbus_mapping(uint16_t num_modbus_registers)
-{
-    modbus_mapping_t *mb_mapping;
-    mb_mapping = (modbus_mapping_t *)malloc(sizeof(modbus_mapping_t));
-    mb_mapping->nb_bits = 0;
-    mb_mapping->tab_bits = NULL;
-    mb_mapping->nb_input_bits = 0;
-    mb_mapping->tab_input_bits = NULL;
-    mb_mapping->start_input_registers = 0;
-    mb_mapping->tab_input_registers = NULL;
-
-    mb_mapping->start_registers = 0;
-    mb_mapping->tab_registers = (uint16_t *)malloc(num_modbus_registers); // mb_regs->register_space;
-    if (mb_mapping->tab_registers == NULL)
-    {
-        printf("could not allocate memory for modbus registers\n");
-    }
-    return mb_mapping;
-}
-
 // example usage: mbdevice chp_template.csv /dev/ttyUSB0 115200 N 8 1
 int main(int argc, char *argv[])
 {
@@ -281,7 +289,7 @@ int main(int argc, char *argv[])
     mbdevice_element_t element;
     mb_device_t *dev = NULL;
 
-    while ((opt = getopt(argc, argv, "f:p:")) != EOF)
+    while ((opt = getopt(argc, argv, "s:f:p:")) != EOF)
     {
         switch (opt)
         {
@@ -295,8 +303,12 @@ int main(int argc, char *argv[])
             printf("CSV file: %s\n", optarg);
             break;
         case 'p':
-            port = atoi(optarg);
-            printf("port: %d\n", port);
+            s->port = atoi(optarg);
+            printf("port: %d\n", s->port);
+            break;
+        case 's':
+            s->unit_id = atoi(optarg);
+            printf("unit_id: %d\n", s->unit_id);
             break;
         default:
             printf("unknown argument: %s\n", optarg);
@@ -316,17 +328,9 @@ int main(int argc, char *argv[])
         print_usage();
         return 0;
     }
-    if (port == -1)
-    {
-        printf("port: port was not specified\n");
-        print_usage();
-        return 0;
-    }
 
     s->ip = (char *)malloc(strlen(server_ip) + 1);
     strcpy(s->ip, server_ip);
-    s->port = port;
-
     printf("\n\n");
 
     // read and ignore first line since this contains csv headers
@@ -346,14 +350,12 @@ int main(int argc, char *argv[])
         while (tok = strsep(&bufPtr, ";"))
         {
             create_mb_device_elements(dev, line_index, tok);
-            // printf("TOK = %s at index: %d\n", tok, line_index);
             line_index++;
         }
         insert_dev(dev);
     }
     fclose(csv_file);
     printlist();
-    // return 0;
 
     uint32_t num_modbus_registers = calc_num_modbus_registers();
     printf("Number of modbus regs: %d\n", num_modbus_registers);
@@ -391,13 +393,13 @@ void *rtu_worker(void *ptr)
     modbus_t *ctx;
     mb_tcp_client_config_t *d = ptr;
 
-    printf("connect to %s at %d\n", d->ip, d->port);
+    printf("connect to %s(unit_id = %d) at %d\n", d->ip, d->unit_id, d->port);
 
     ctx = modbus_new_tcp(d->ip, d->port);
     query = malloc(MODBUS_TCP_MAX_ADU_LENGTH);
     modbus_set_debug(ctx, TRUE);
 
-    s = modbus_tcp_listen(ctx, 1);
+    s = modbus_tcp_listen(ctx, d->unit_id);
     modbus_tcp_accept(ctx, &s);
 
     for (;;)
@@ -413,7 +415,7 @@ void *rtu_worker(void *ptr)
         {
             /* Quit */
             printf("rc returned -1 for RECV\n");
-            continue;
+            //break;
         }
         rc = modbus_reply(ctx, query, rc, modbus_register_map);
         if (rc == -1)
@@ -430,9 +432,10 @@ void *simulator_worker(void *ptr)
     uint32_t counter = 0;
     for (;;)
     {
-        //system("clear");
+        system("clear");
         mb_sim();
         print_mb_map();
+        //write_mb_register_float32(20, 1234.37);
         sleep(5);
     }
 }

@@ -1,0 +1,2 @@
+integrate;key;address;function_code;registers;format;byte_order;unit;scale_factor;interval;labels
+1;WZ Seriennummer;8;3;2;INT32;CDAB;none;1;15s;
