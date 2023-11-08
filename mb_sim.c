@@ -15,9 +15,10 @@ static char *elements[] = {"NAME", "ADDRESS", "REGISTER", "FORMAT", "VALUE", "UN
 static int once = 1;
 
 static mb_device_data_map_t mb_data_map[] = {
-    {.start_addr = 0, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 100, .step = -1},
-    {.start_addr = 1, .datatype = MB_INT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 300, .step = -1},
-    {.start_addr = 3, .datatype = MB_FLOAT32, .bo = CDAB, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 1234.56, .step = -1},
+    {.start_addr = 0, .datatype = MB_INT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 100, .step = -1},
+    {.start_addr = 2, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 300, .step = -1},
+    {.start_addr = 4, .datatype = MB_FLOAT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 1234.56, .step = -1},
+    {.start_addr = 6, .datatype = MB_FLOAT32, .bo = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 7891.74, .step = -1},
 };
 
 size_t string_lengh(const char *s)
@@ -181,20 +182,16 @@ int print_mb_map(void)
         index_counter += 21;
 
         // copy value
-        printf("copy value\n");
         memset(tmpstr, 0, 10);
         if (temp->datatype == MB_INT16 || temp->datatype == MB_INT32)
         {
             uint32_t value = read_mb_register(temp->start_address, temp->byteorder, temp->regs);
-            printf("datatype in INT\n");
             sprintf(tmpstr, "%d", value);
             tmp_len = string_lengh(tmpstr);
             create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         }
         if (temp->datatype == MB_FLOAT32)
         {
-            printf("datatype in FLOAT\n");
-            printf("reading float\n");
             float real = read_mb_register_f32(temp->start_address, temp->byteorder, temp->regs);
             int len = snprintf(NULL, 0, "%f", real);
             char *tmp_str = malloc(len + 1);
@@ -252,7 +249,6 @@ int mb_sim(void)
             {
                 write_mb_register_float32(temp->start_address, temp->byteorder, mb_data_map[count].value.f_data);
                 f_data = mb_data_map[count].value.f_data;
-                printf("f data = %f\n", f_data);
                 mb_data_map[count].value.f_data = f_data + mb_data_map[count].step;
             }
             else
@@ -299,14 +295,10 @@ int mb_sim(void)
             {
                 write_mb_register_float32(temp->start_address, temp->byteorder, mb_data_map[count].value.f_data);
                 f_data = mb_data_map[count].value.f_data;
-                printf("f data = %f, start_address: %d, byteorder: %d\n", f_data, temp->start_address, temp->byteorder);
             }
             else
             {
-                i_data = mb_data_map[count].value.i_data;
-                printf("i data = %d, start_address: %d, byteorder: %d\n", i_data, temp->start_address, temp->byteorder);
                 write_mb_register(temp->start_address, mb_data_map[count].bo, mb_data_map[count].datatype, mb_data_map[count].value.i_data);
-                //void write_mb_register(uint16_t offset, mbdevice_byteorder_t bo, , uint32_t data)
             }
         }
         // write_mb_register_float32

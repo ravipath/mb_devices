@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <arpa/inet.h>
 #include "modbus.h"
 #include "modbus-rtu.h"
 #include "mb_device_tcp.h"
@@ -46,16 +47,16 @@ float read_mb_register_f32(uint8_t address, mbdevice_byteorder_t bo, uint8_t len
     switch (bo)
     {
     case ABCD:
-        real = modbus_get_float_badc(modbus_register_map->tab_registers + address);
-        break;
-    case CDAB:
-        real = modbus_get_float_dcba(modbus_register_map->tab_registers + address);
-        break;
-    case BADC:
         real = modbus_get_float_abcd(modbus_register_map->tab_registers + address);
         break;
-    case DCBA:
+    case CDAB:
         real = modbus_get_float_cdab(modbus_register_map->tab_registers + address);
+        break;
+    case BADC:
+        real = modbus_get_float_badc(modbus_register_map->tab_registers + address);
+        break;
+    case DCBA:
+        real = modbus_get_float_dcba(modbus_register_map->tab_registers + address);
         break;
     default:
         break;
@@ -73,8 +74,26 @@ uint32_t read_mb_register(uint8_t address, mbdevice_byteorder_t bo, uint8_t leng
         data = *mb_reg;
         break;
     case 2:
-        data = (data | *mb_reg) << 16;
-        data = (data | *(mb_reg + 1));
+        switch (bo)
+        {
+        case ABCD: // big endian
+            data = (data | *mb_reg) << 16;
+            data = (data | *(mb_reg + 1));
+            break;
+        case CDAB:
+            break;
+        case BADC: // little endian
+            data = (data | *mb_reg) << 16;
+            data = (data | *(mb_reg + 1));
+            data = ((data & (0x0000FFFF)) << 16) | ((data & (0xFFFF0000)) >> 16);
+            data = ((data & (0x00FF00FF)) << 8) | ((data & (0xFF00FF00)) >> 8);
+            break;
+        case DCBA:
+            break;
+        default:
+            break;
+        }
+
         break;
     default:
         break;
@@ -108,16 +127,32 @@ void write_mb_register_float32(uint16_t offset, mbdevice_byteorder_t bo, float d
 void write_mb_register(uint16_t offset, mbdevice_byteorder_t bo, mbdevice_datatype_t datatype, uint32_t data)
 {
     uint16_t *mb_reg_offset = modbus_register_map->tab_registers + offset;
-    printf("write_mb_register:datatype: %d and data is %d\n", datatype, data);
     switch (datatype)
     {
     case MB_INT16:
         // 16 bit big endian - write code to process 16 bit little endian
-        printf("case 1 for 16bit\n");
+        printf("write INT16: %d\n", data);
         *mb_reg_offset = data;
         break;
     case MB_INT32:
-        printf("case 2 for 32bit\n");
+        switch (bo)
+        {
+        case ABCD: // big endian
+            printf("write ABCD: %d\n", data);
+            *mb_reg_offset = (uint16_t)(data >> 16);
+            *(mb_reg_offset + 1) = (uint16_t)(data);
+            break;
+        case CDAB:
+            break;
+        case BADC: // little endian
+            printf("write BADC\n");
+            data = htonl(data);
+            *mb_reg_offset = (uint16_t)(data >> 16);
+            *(mb_reg_offset + 1) = (uint16_t)(data);
+            break;
+        case DCBA:
+            break;
+        }
         // 32 bit big endian - write code to process 32 bit little endian
         *mb_reg_offset = (uint16_t)(data >> 16);
         *(mb_reg_offset + 1) = (uint16_t)(data);
@@ -217,17 +252,17 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
     int r = 0;
     mb_device_t *l_dev = *d;
     l_dev->nxt = NULL;
-    printf("element: %d\n", e);
+    // printf("element: %d\n", e);
     switch (e)
     {
     case INTEGRATE:
         // char tok = data[0];
         l_dev->integrate = atoi((char *)data);
-        printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, l_dev->integrate);
+        // printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, l_dev->integrate);
         break;
     case INTERVAL:
         l_dev->interval = atoi((char *)data);
-        printf("INTERVAL: %s | Inserted: %d\n", (char *)data, l_dev->interval);
+        // printf("INTERVAL: %s | Inserted: %d\n", (char *)data, l_dev->interval);
         break;
     case KEY:
         l_dev->name = (char *)malloc(strlen((char *)data));
@@ -239,19 +274,19 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
         {
             strcpy(l_dev->name, (char *)data);
         }
-        printf("KEY: %s | Inserted: %s\n", (char *)data, l_dev->name);
+        // printf("KEY: %s | Inserted: %s\n", (char *)data, l_dev->name);
         break;
     case ADDRESS:
         l_dev->start_address = atoi((char *)data);
-        printf("ADDRESS: %s | Inserted: %d\n", (char *)data, l_dev->start_address);
+        // printf("ADDRESS: %s | Inserted: %d\n", (char *)data, l_dev->start_address);
         break;
     case FUNCTION_CODE:
         l_dev->fc = atoi((char *)data);
-        printf("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, l_dev->fc);
+        // printf("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, l_dev->fc);
         break;
     case REGISTERS:
         l_dev->regs = atoi((char *)data);
-        printf("REGISTERS: %s | Inserted: %d\n", (char *)data, l_dev->regs);
+        // printf("REGISTERS: %s | Inserted: %d\n", (char *)data, l_dev->regs);
         break;
     case FORMAT:
         if (strcmp((char *)data, "INT8") == 0)
@@ -274,7 +309,7 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
         {
             l_dev->datatype = MB_UNKNOWN;
         }
-        printf("FORMAT: %s | Inserted: %d\n", (char *)data, l_dev->datatype);
+        // printf("FORMAT: %s | Inserted: %d\n", (char *)data, l_dev->datatype);
         break;
     case BO:
         if (strcmp((char *)data, "ABCD") == 0)
@@ -297,7 +332,7 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
         {
             l_dev->byteorder = MB_UNKNOWN;
         }
-        printf("BO: %s | Inserted: %d\n", (char *)data, l_dev->byteorder);
+        // printf("BO: %s | Inserted: %d\n", (char *)data, l_dev->byteorder);
         break;
     case UNIT:
         l_dev->unit = (char *)malloc(strlen((char *)data));
@@ -309,11 +344,11 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
         {
             strcpy(l_dev->unit, (char *)data);
         }
-        printf("UNIT: %s | Inserted: %s\n", (char *)data, l_dev->unit);
+        // printf("UNIT: %s | Inserted: %s\n", (char *)data, l_dev->unit);
         break;
     case SCALE_FACTOR:
         l_dev->scale_factor = atoi((char *)data);
-        printf("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, l_dev->scale_factor);
+        // printf("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, l_dev->scale_factor);
         break;
     default:
         break;
@@ -408,27 +443,19 @@ int main(int argc, char *argv[])
             printf("cannot allocate memory for device node\n");
             return 0;
         }
-        else
-        {
-            printf("create device node  %d\n", device_node_counter++);
-        }
         bufPtr = buf;
         while (tok = strsep(&bufPtr, ";"))
         {
-            printf("create next dev element: %s\n", tok);
             create_mb_device_elements(&dev, line_index, tok);
-            printf("-------------------------------------\n");
             line_index++;
         }
 
         insert_dev(dev);
-        printf("tomato 3\n");
     }
     fclose(csv_file);
-    printlist();
+    // printlist();
 
     uint32_t num_modbus_registers = calc_num_modbus_registers();
-    printf("Number of modbus regs: %d\n", num_modbus_registers);
     modbus_register_map = modbus_mapping_new_start_address(0,
                                                            0,
                                                            0,
