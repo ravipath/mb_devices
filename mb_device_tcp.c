@@ -42,8 +42,24 @@ void print_usage(void)
 
 float read_mb_register_f32(uint8_t address, mbdevice_byteorder_t bo, uint8_t length)
 {
-    float real = modbus_get_float_abcd(modbus_register_map->tab_registers + address);
-    printf("REAL: %f\n", real);
+    float real;
+    switch (bo)
+    {
+    case ABCD:
+        real = modbus_get_float_badc(modbus_register_map->tab_registers + address);
+        break;
+    case CDAB:
+        real = modbus_get_float_dcba(modbus_register_map->tab_registers + address);
+        break;
+    case BADC:
+        real = modbus_get_float_abcd(modbus_register_map->tab_registers + address);
+        break;
+    case DCBA:
+        real = modbus_get_float_cdab(modbus_register_map->tab_registers + address);
+        break;
+    default:
+        break;
+    }
     return real;
 }
 
@@ -70,20 +86,38 @@ uint32_t read_mb_register(uint8_t address, mbdevice_byteorder_t bo, uint8_t leng
 void write_mb_register_float32(uint16_t offset, mbdevice_byteorder_t bo, float data)
 {
     uint16_t *mb_reg_offset = modbus_register_map->tab_registers + offset;
-    float real;
-    modbus_set_float_badc(data, mb_reg_offset);
+    switch (bo)
+    {
+    case ABCD:
+        modbus_set_float_abcd(data, mb_reg_offset);
+        break;
+    case CDAB:
+        modbus_set_float_cdab(data, mb_reg_offset);
+        break;
+    case BADC:
+        modbus_set_float_badc(data, mb_reg_offset);
+        break;
+    case DCBA:
+        modbus_set_float_dcba(data, mb_reg_offset);
+        break;
+    default:
+        break;
+    }
 }
 
-void write_mb_register(uint16_t offset, mbdevice_byteorder_t bo, uint8_t num_regs, uint32_t data)
+void write_mb_register(uint16_t offset, mbdevice_byteorder_t bo, mbdevice_datatype_t datatype, uint32_t data)
 {
     uint16_t *mb_reg_offset = modbus_register_map->tab_registers + offset;
-    switch (num_regs)
+    printf("write_mb_register:datatype: %d and data is %d\n", datatype, data);
+    switch (datatype)
     {
-    case 1:
+    case MB_INT16:
         // 16 bit big endian - write code to process 16 bit little endian
+        printf("case 1 for 16bit\n");
         *mb_reg_offset = data;
         break;
-    case 2:
+    case MB_INT32:
+        printf("case 2 for 32bit\n");
         // 32 bit big endian - write code to process 32 bit little endian
         *mb_reg_offset = (uint16_t)(data >> 16);
         *(mb_reg_offset + 1) = (uint16_t)(data);
@@ -150,7 +184,7 @@ void printlist(void)
         printf("element %d\n", counter++);
         printf("---------\n");
         printf("name: %s\n", temp->name);
-        printf("byteorder: %s\n", temp->byteorder);
+        printf("byteorder: %d\n", temp->byteorder);
         printf("datatype: %d\n", temp->datatype);
         printf("unit: %s\n", temp->unit);
         printf("fc: %d\n", temp->fc);
@@ -178,105 +212,110 @@ void insert_dev(mb_device_t *d)
     temp->nxt = d;
 }
 
-int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
+int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
 {
     int r = 0;
-    d->nxt = NULL;
+    mb_device_t *l_dev = *d;
+    l_dev->nxt = NULL;
+    printf("element: %d\n", e);
     switch (e)
     {
     case INTEGRATE:
-        d->integrate = atoi((char *)data);
-        printf("INTEGRATE: %s | Inserted: %s\n", (char *)data, d->integrate);
+        // char tok = data[0];
+        l_dev->integrate = atoi((char *)data);
+        printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, l_dev->integrate);
         break;
     case INTERVAL:
-        d->interval = atoi((char *)data);
-        printf("INTERVAL: %s | Inserted: %s\n", (char *)data, d->interval);
+        l_dev->interval = atoi((char *)data);
+        printf("INTERVAL: %s | Inserted: %d\n", (char *)data, l_dev->interval);
         break;
     case KEY:
-        d->name = (char *)malloc(strlen((char *)data));
-        if (d->name == NULL)
+        l_dev->name = (char *)malloc(strlen((char *)data));
+        if (l_dev->name == NULL)
         {
             r = -1;
         }
         else
         {
-            strcpy(d->name, (char *)data);
+            strcpy(l_dev->name, (char *)data);
         }
-        printf("KEY: %s | Inserted: %s\n", (char *)data, d->name);
+        printf("KEY: %s | Inserted: %s\n", (char *)data, l_dev->name);
         break;
     case ADDRESS:
-        d->start_address = atoi((char *)data);
-        printf("ADDRESS: %s | Inserted: %d\n", (char *)data, d->start_address);
+        l_dev->start_address = atoi((char *)data);
+        printf("ADDRESS: %s | Inserted: %d\n", (char *)data, l_dev->start_address);
         break;
     case FUNCTION_CODE:
-        d->fc = atoi((char *)data);
-        printf("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, d->fc);
+        l_dev->fc = atoi((char *)data);
+        printf("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, l_dev->fc);
         break;
     case REGISTERS:
-        d->regs = atoi((char *)data);
-        printf("REGISTERS: %s | Inserted: %d\n", (char *)data, d->regs);
+        l_dev->regs = atoi((char *)data);
+        printf("REGISTERS: %s | Inserted: %d\n", (char *)data, l_dev->regs);
         break;
     case FORMAT:
         if (strcmp((char *)data, "INT8") == 0)
         {
-            d->datatype = MB_INT8;
+            l_dev->datatype = MB_INT8;
         }
         else if (strcmp((char *)data, "INT16") == 0)
         {
-            d->datatype = MB_INT16;
+            l_dev->datatype = MB_INT16;
         }
         else if (strcmp((char *)data, "INT32") == 0)
         {
-            d->datatype = MB_INT32;
+            l_dev->datatype = MB_INT32;
         }
         else if (strcmp((char *)data, "FLOAT32") == 0)
         {
-            d->datatype = MB_FLOAT32;
+            l_dev->datatype = MB_FLOAT32;
         }
         else
         {
-            d->datatype = MB_UNKNOWN;
+            l_dev->datatype = MB_UNKNOWN;
         }
+        printf("FORMAT: %s | Inserted: %d\n", (char *)data, l_dev->datatype);
         break;
-        printf("FORMAT: %s | Inserted: %d\n", (char *)data, d->datatype);
     case BO:
         if (strcmp((char *)data, "ABCD") == 0)
         {
-            d->byteorder = ABCD;
+            l_dev->byteorder = ABCD;
         }
         else if (strcmp((char *)data, "CDAB") == 0)
         {
-            d->byteorder = CDAB;
+            l_dev->byteorder = CDAB;
         }
         else if (strcmp((char *)data, "BADC") == 0)
         {
-            d->byteorder = BADC;
+            l_dev->byteorder = BADC;
         }
         else if (strcmp((char *)data, "DCBA") == 0)
         {
-            d->byteorder = DCBA;
+            l_dev->byteorder = DCBA;
         }
         else
         {
-            d->byteorder = MB_UNKNOWN;
+            l_dev->byteorder = MB_UNKNOWN;
         }
-        printf("BO: %s | Inserted: %d\n", (char *)data, d->byteorder);
+        printf("BO: %s | Inserted: %d\n", (char *)data, l_dev->byteorder);
         break;
     case UNIT:
-        d->unit = (char *)malloc(strlen((char *)data));
-        if (d->unit == NULL)
+        l_dev->unit = (char *)malloc(strlen((char *)data));
+        if (l_dev->unit == NULL)
         {
             r = -1;
         }
         else
         {
-            strcpy(d->unit, (char *)data);
+            strcpy(l_dev->unit, (char *)data);
         }
-        printf("UNIT: %s | Inserted: %s\n", (char *)data, d->unit);
+        printf("UNIT: %s | Inserted: %s\n", (char *)data, l_dev->unit);
         break;
     case SCALE_FACTOR:
-        d->scale_factor = atoi((char *)data);
-        printf("SCALE_FACTOR: %s | Inserted: %s\n", (char *)data, d->scale_factor);
+        l_dev->scale_factor = atoi((char *)data);
+        printf("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, l_dev->scale_factor);
+        break;
+    default:
         break;
     }
     return r;
@@ -357,20 +396,33 @@ int main(int argc, char *argv[])
     memset(buf, 0, 1024);
 
     char *tok;
+    int device_node_counter = 0;
 
     // start reading csv line by line
     while (fgets(buf, 1024, csv_file))
     {
         line_index = 0;
         dev = (mb_device_t *)malloc(sizeof(mb_device_t));
+        if (dev == NULL)
+        {
+            printf("cannot allocate memory for device node\n");
+            return 0;
+        }
+        else
+        {
+            printf("create device node  %d\n", device_node_counter++);
+        }
         bufPtr = buf;
-
         while (tok = strsep(&bufPtr, ";"))
         {
-            create_mb_device_elements(dev, line_index, tok);
+            printf("create next dev element: %s\n", tok);
+            create_mb_device_elements(&dev, line_index, tok);
+            printf("-------------------------------------\n");
             line_index++;
         }
+
         insert_dev(dev);
+        printf("tomato 3\n");
     }
     fclose(csv_file);
     printlist();
@@ -453,7 +505,6 @@ void *simulator_worker(void *ptr)
         // system("clear");
         mb_sim();
         print_mb_map();
-        // write_mb_register_float32(20, 1234.37);
         sleep(5);
     }
 }

@@ -22,7 +22,7 @@ typedef struct mb_device_data_map
 {
     uint8_t start_addr;
     mbdevice_datatype_t datatype;
-    mbdevice_byteorder_t format;
+    mbdevice_byteorder_t bo;
     mb_device_dp_value_range_t dp_value_range;
     uint8_t step;
     uint32_t max_value;

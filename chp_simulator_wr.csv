@@ -1,0 +1,4 @@
+integrate;key;address;function_code;registers;format;byte_order;unit;scale_factor;interval
+1;sample_reg_i16;0;3;1;INT16;ABCD;none;1;15s;
+1;sample_reg_i32;1;3;2;INT32;ABCD;none;1;15s;
+1;sample_reg_f32;3;3;2;FLOAT32;DCBA;none;1;15s;

@@ -15,30 +15,9 @@ static char *elements[] = {"NAME", "ADDRESS", "REGISTER", "FORMAT", "VALUE", "UN
 static int once = 1;
 
 static mb_device_data_map_t mb_data_map[] = {
-    {.start_addr = 0, .datatype = MB_INT32, .format = ABCD, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 78200, .step = 20},
-    {.start_addr = 2, .datatype = MB_INT32, .format = ABCD, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 56830, .step = 1},
-    {.start_addr = 4, .datatype = MB_INT32, .format = ABCD, .dp_value_range = RANGE, .max_value = 436, .min_value = 177, .value.i_data = -1, .step = -1},
-    {.start_addr = 6, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 8, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 84693176, .step = -1},
-    {.start_addr = 10, .datatype = MB_INT32, .format = ABCD, .dp_value_range = RANGE, .max_value = 16, .min_value = 8, .value.i_data = -1, .step = -1},
-    {.start_addr = 12, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 13, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 52, .min_value = 50, .value.i_data = -1, .step = -1},
-    {.start_addr = 14, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 74, .min_value = 72, .value.i_data = -1, .step = -1},
-    {.start_addr = 15, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 23, .min_value = 21, .value.i_data = -1, .step = -1},
-    {.start_addr = 16, .datatype = MB_INT16, .format = ABCD, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 4600, .step = 1},
-    {.start_addr = 17, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 18, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 19, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 45, .step = -1},
-    {.start_addr = 20, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 217, .step = -1},
-    {.start_addr = 21, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
-    {.start_addr = 22, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
-    {.start_addr = 24, .datatype = MB_INT32, .format = CDAB, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
-    {.start_addr = 26, .datatype = MB_INT32, .format = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
-    {.start_addr = 28, .datatype = MB_INT32, .format = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
-    {.start_addr = 30, .datatype = MB_FLOAT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
-    {.start_addr = 32, .datatype = MB_FLOAT32, .format = CDAB, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
-    {.start_addr = 34, .datatype = MB_FLOAT32, .format = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
-    {.start_addr = 36, .datatype = MB_FLOAT32, .format = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
+    {.start_addr = 0, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 100, .step = -1},
+    {.start_addr = 1, .datatype = MB_INT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 300, .step = -1},
+    {.start_addr = 3, .datatype = MB_FLOAT32, .bo = CDAB, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 1234.56, .step = -1},
 };
 
 size_t string_lengh(const char *s)
@@ -101,6 +80,8 @@ int print_mb_map(void)
     mb_device_t *temp = head;
     uint8_t count = calc_num_datapoints();
     uint8_t elements_length = sizeof(elements) / sizeof(elements[0]);
+
+    printf("print mb map\n");
 
     for (int n = 0; n < elements_length; n++)
     {
@@ -200,16 +181,20 @@ int print_mb_map(void)
         index_counter += 21;
 
         // copy value
+        printf("copy value\n");
         memset(tmpstr, 0, 10);
         if (temp->datatype == MB_INT16 || temp->datatype == MB_INT32)
         {
             uint32_t value = read_mb_register(temp->start_address, temp->byteorder, temp->regs);
+            printf("datatype in INT\n");
             sprintf(tmpstr, "%d", value);
             tmp_len = string_lengh(tmpstr);
             create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         }
         if (temp->datatype == MB_FLOAT32)
         {
+            printf("datatype in FLOAT\n");
+            printf("reading float\n");
             float real = read_mb_register_f32(temp->start_address, temp->byteorder, temp->regs);
             int len = snprintf(NULL, 0, "%f", real);
             char *tmp_str = malloc(len + 1);
@@ -267,6 +252,7 @@ int mb_sim(void)
             {
                 write_mb_register_float32(temp->start_address, temp->byteorder, mb_data_map[count].value.f_data);
                 f_data = mb_data_map[count].value.f_data;
+                printf("f data = %f\n", f_data);
                 mb_data_map[count].value.f_data = f_data + mb_data_map[count].step;
             }
             else
@@ -311,11 +297,16 @@ int mb_sim(void)
             }
             if (mb_data_map[count].datatype == MB_FLOAT32)
             {
-                write_mb_register_float32(temp->start_address, mb_data_map[count].format, mb_data_map[count].value.f_data);
+                write_mb_register_float32(temp->start_address, temp->byteorder, mb_data_map[count].value.f_data);
+                f_data = mb_data_map[count].value.f_data;
+                printf("f data = %f, start_address: %d, byteorder: %d\n", f_data, temp->start_address, temp->byteorder);
             }
             else
             {
-                write_mb_register(temp->start_address, temp->regs, mb_data_map[count].format, mb_data_map[count].value.i_data);
+                i_data = mb_data_map[count].value.i_data;
+                printf("i data = %d, start_address: %d, byteorder: %d\n", i_data, temp->start_address, temp->byteorder);
+                write_mb_register(temp->start_address, mb_data_map[count].bo, mb_data_map[count].datatype, mb_data_map[count].value.i_data);
+                //void write_mb_register(uint16_t offset, mbdevice_byteorder_t bo, , uint32_t data)
             }
         }
         // write_mb_register_float32
