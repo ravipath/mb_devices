@@ -526,7 +526,7 @@ void *simulator_worker(void *ptr)
     uint32_t counter = 0;
     for (;;)
     {
-        // system("clear");
+        system("clear");
         mb_sim();
         print_mb_map();
         sleep(5);
