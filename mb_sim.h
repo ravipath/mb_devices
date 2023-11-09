@@ -2,7 +2,7 @@
 #define _MB_SIM_H_
 
 #include <stdint.h>
-#include "mb_device_tcp.h"
+#include "mb_device_rtu.h"
 
 typedef enum
 {

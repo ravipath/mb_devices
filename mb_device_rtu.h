@@ -33,12 +33,14 @@ typedef enum
     INTERVAL
 } mbdevice_element_t;
  
-typedef struct mb_tcp_client_config
+typedef struct mb_rtu_client_config
 {
-    char *ip;
-    uint32_t unit_id;
-    uint32_t port;
-} mb_tcp_client_config_t;
+    char *dev;
+    char parity;
+    int8_t databits;
+    int8_t stopbits;
+    int32_t baud;
+} mb_rtu_client_config_t;
 
 typedef struct mb_device
 {

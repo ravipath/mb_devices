@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "mb_device_tcp.h"
+#include "mb_device_rtu.h"
 #include "mb_sim.h"
 
 #define DELIMITER "|"

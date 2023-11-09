@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include "modbus.h"
 #include "modbus-rtu.h"
-#include "mb_device_tcp.h"
+#include "mb_device_rtu.h"
 #include "mb_sim.h"
 
 #define UNIT_ID 1
@@ -37,8 +37,12 @@ mb_device_t *get_head(void)
 
 void print_usage(void)
 {
-    fprintf(stderr, "Usage: ./mb_device_tcp [-f csv_file_path] [-s server/unit id] [-p port]\n");
-    fprintf(stderr, "          [-p] port (e.g., 501)\n");
+    fprintf(stderr, "Usage: [-f csv_file_path]\n");
+    fprintf(stderr, "          [-t] serial device name (e.g., /dev/ttyXXX)\n");
+    fprintf(stderr, "          [-b] baudrate (e.g., 115200, 9600,...) \n");
+    fprintf(stderr, "          [-p] parity (E for even,O for odd, N for no parity)\n");
+    fprintf(stderr, "          [-d] databits(number of data bits, for e.g., 8)\n");
+    fprintf(stderr, "          [-s] stop bits(1 or 0)\n");
 }
 
 float read_mb_register_f32(uint8_t address, mbdevice_byteorder_t bo, uint8_t length)
@@ -372,17 +376,19 @@ int main(int argc, char *argv[])
     pthread_mutex_t mutex;
     int r_th = 0;
 
-    mb_tcp_client_config_t *s = (mb_tcp_client_config_t *)malloc(sizeof(mb_tcp_client_config_t));
+    mb_rtu_client_config_t *s = (mb_rtu_client_config_t *)malloc(sizeof(mb_rtu_client_config_t));
+    s->dev = NULL;
+    s->baud = -1;
+    s->databits = -1;
+    s->stopbits = -1;
+    s->parity = 'a';
 
     // cmdline args
     FILE *csv_file = NULL;
-    const char *server_ip = "0.0.0.0";
-    int32_t port = -1;
-
     mbdevice_element_t element;
     mb_device_t *dev = NULL;
 
-    while ((opt = getopt(argc, argv, "s:f:p:")) != EOF)
+    while ((opt = getopt(argc, argv, "f:t:b:p:d:s:")) != EOF)
     {
         switch (opt)
         {
@@ -393,15 +399,37 @@ int main(int argc, char *argv[])
                 printf("%s: %s\n", optarg, strerror(errno));
                 return 0;
             }
-            printf("CSV file: %s\n", optarg);
             break;
+
+        case 't':
+            if (strlen(optarg) == 0)
+            {
+                printf("serial device name error: name cannot be blank. see usage\n");
+                print_usage();
+                return 0;
+            }
+            s->dev = (char *)malloc(strlen(optarg) + 1);
+            if (s->dev == NULL)
+            {
+                printf("malloc error: cannot allocate memory for serial device %s\n", optarg);
+                return 0;
+            }
+            strcpy(s->dev, optarg);
+            break;
+
+        case 'b':
+            s->baud = atoi(optarg);
+            break;
+
         case 'p':
-            s->port = atoi(optarg);
-            printf("port: %d\n", s->port);
+            s->parity = *optarg;
+            break;
+
+        case 'd':
+            s->databits = atoi(optarg);
             break;
         case 's':
-            s->unit_id = atoi(optarg);
-            printf("unit_id: %d\n", s->unit_id);
+            s->stopbits = atoi(optarg);
             break;
         default:
             printf("unknown argument: %s\n", optarg);
@@ -415,16 +443,30 @@ int main(int argc, char *argv[])
         print_usage();
         return 0;
     }
-    if (server_ip == NULL)
+    if (s->baud == -1)
     {
-        printf("server_ip: no server ip was specified\n");
+        printf("baud error: baud not set\n");
         print_usage();
         return 0;
     }
-
-    s->ip = (char *)malloc(strlen(server_ip) + 1);
-    strcpy(s->ip, server_ip);
-    printf("\n\n");
+    if (s->parity == 'a')
+    {
+        printf("parity error: parity not set\n");
+        print_usage();
+        return 0;
+    }
+    if (s->databits == -1)
+    {
+        printf("databits error: databits not set\n");
+        print_usage();
+        return 0;
+    }
+    if (s->stopbits == 'P')
+    {
+        printf("stop bits error: stop bits not set.\n");
+        print_usage();
+        return 0;
+    }
 
     // read and ignore first line since this contains csv headers
     // Appropriate check must be coded later to asscertain consistency with the csv template
@@ -474,8 +516,7 @@ int main(int argc, char *argv[])
     pthread_join(rtu_thread, NULL);
     pthread_join(simulator_thread, NULL);
     free_allocated_spaces();
-    free(s->ip);
-    free(s);
+
     modbus_mapping_free(modbus_register_map);
     printf("exiting the MAIN application ...\n");
 }
@@ -483,22 +524,21 @@ int main(int argc, char *argv[])
 void *rtu_worker(void *ptr)
 {
     int rc;
-    int s = -1;
-    int count = 0;
-    // int header_length;
-
     uint8_t *query = NULL;
     modbus_t *ctx;
-    mb_tcp_client_config_t *d = ptr;
+    ctx = modbus_new_rtu("/dev/ttyUSB0", 115200, 'N', 8, 1); // serial_device, baud, parity, databits, stopbits);
+    modbus_set_slave(ctx, 1);
 
-    printf("connect to %s(unit_id = %d) at %d\n", d->ip, d->unit_id, d->port);
-
-    ctx = modbus_new_tcp(d->ip, d->port);
-    query = malloc(MODBUS_TCP_MAX_ADU_LENGTH);
+    query = malloc(MODBUS_RTU_MAX_ADU_LENGTH);
+    printf("query\n");
     modbus_set_debug(ctx, TRUE);
-
-    s = modbus_tcp_listen(ctx, d->unit_id);
-    modbus_tcp_accept(ctx, &s);
+    printf("modbus_set_debug\n");
+    if (modbus_connect(ctx) == -1)
+    {
+        fprintf(stderr, "Unable to connect %s\n", modbus_strerror(errno));
+        modbus_free(ctx);
+    }
+    printf("modbus_connect\n");
 
     for (;;)
     {
