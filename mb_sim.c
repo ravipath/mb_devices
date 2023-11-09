@@ -14,11 +14,30 @@ static char table[15][150] = {0, 0};
 static char *elements[] = {"NAME", "ADDRESS", "REGISTER", "FORMAT", "VALUE", "UNIT"};
 static int once = 1;
 
+/* static mb_device_data_map_t mb_data_map[] = {
+    {.start_addr = 0, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 50, .step = -1},
+    {.start_addr = 1, .datatype = MB_INT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 100, .step = -1},
+    {.start_addr = 3, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 300, .step = -1},
+    {.start_addr = 5, .datatype = MB_FLOAT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 1234.56, .step = -1},
+    {.start_addr = 7, .datatype = MB_FLOAT32, .bo = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 7891.74, .step = -1},
+}; */
+
+
 static mb_device_data_map_t mb_data_map[] = {
-    {.start_addr = 0, .datatype = MB_INT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 100, .step = -1},
-    {.start_addr = 2, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 300, .step = -1},
-    {.start_addr = 4, .datatype = MB_FLOAT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 1234.56, .step = -1},
-    {.start_addr = 6, .datatype = MB_FLOAT32, .bo = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 7891.74, .step = -1},
+    {.start_addr = 0, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 50, .step = -1},
+    {.start_addr = 2, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 100, .step = -1},
+    {.start_addr = 4, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 150, .step = -1},
+    {.start_addr = 6, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 200, .step = -1},
+    {.start_addr = 8, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 250, .step = -1},
+    {.start_addr = 10, .datatype = MB_INT32, .bo = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 300, .step = -1},
+    {.start_addr = 12, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 350, .step = -1},
+    {.start_addr = 13, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 400, .step = -1},
+    {.start_addr = 14, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 450, .step = -1},
+    {.start_addr = 15, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 500, .step = -1},
+    {.start_addr = 16, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 550, .step = -1},
+    {.start_addr = 17, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 600, .step = -1},
+    {.start_addr = 18, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 650, .step = -1},
+    {.start_addr = 19, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 700, .step = -1},
 };
 
 size_t string_lengh(const char *s)

@@ -37,7 +37,7 @@ mb_device_t *get_head(void)
 
 void print_usage(void)
 {
-    fprintf(stderr, "Usage: mb_device [-f csv_file_path] [-p port]\n");
+    fprintf(stderr, "Usage: ./mb_device_tcp [-f csv_file_path] [-s server/unit id] [-p port]\n");
     fprintf(stderr, "          [-p] port (e.g., 501)\n");
 }
 
@@ -131,21 +131,18 @@ void write_mb_register(uint16_t offset, mbdevice_byteorder_t bo, mbdevice_dataty
     {
     case MB_INT16:
         // 16 bit big endian - write code to process 16 bit little endian
-        printf("write INT16: %d\n", data);
         *mb_reg_offset = data;
         break;
     case MB_INT32:
         switch (bo)
         {
         case ABCD: // big endian
-            printf("write ABCD: %d\n", data);
             *mb_reg_offset = (uint16_t)(data >> 16);
             *(mb_reg_offset + 1) = (uint16_t)(data);
             break;
         case CDAB:
             break;
         case BADC: // little endian
-            printf("write BADC\n");
             data = htonl(data);
             *mb_reg_offset = (uint16_t)(data >> 16);
             *(mb_reg_offset + 1) = (uint16_t)(data);

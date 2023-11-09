@@ -1,10 +1,10 @@
 integrate;key;address;function_code;registers;format;byte_order;unit;scale_factor;interval;labels
-1;WZ Waermemenge;0;3;2;INT32;CDAB;kWh;1;15s;
-1;WZ Volumen;2;3;2;INT32;CDAB;m3;1;15s;
-1;WZ Leistung;4;3;2;INT32;CDAB;kW;1;15s;
-1;Waermemenge 1.UED;6;3;2;INT32;CDAB;none;1;15s;
-1;WZ Seriennummer;8;3;2;INT32;CDAB;none;1;15s;
-1;WZ Durchfluss;10;3;2;INT32;CDAB;m3/h;1000;15s;
+1;WZ Waermemenge;0;3;2;INT32;BADC;kWh;1;15s;
+1;WZ Volumen;2;3;2;INT32;BADC;m3;1;15s;
+1;WZ Leistung;4;3;2;INT32;BADC;kW;1;15s;
+1;Waermemenge 1.UED;6;3;2;INT32;BADC;none;1;15s;
+1;WZ Seriennummer;8;3;2;INT32;BADC;none;1;15s;
+1;WZ Durchfluss;10;3;2;INT32;BADC;m3/h;1000;15s;
 1;Fehleranzeige;12;3;1;INT16;ABCD;none;1;15s;
 1;WZ Ruecklauftemp.;13;3;1;INT16;ABCD;Celcius;100;15s;
 1;WZ Vorlauftemp;14;3;1;INT16;ABCD;Celcius;100;15s;
