@@ -89,6 +89,11 @@ uint32_t read_mb_register(uint8_t address, mbdevice_byteorder_t bo, uint8_t leng
             data = ((data & (0x00FF00FF)) << 8) | ((data & (0xFF00FF00)) >> 8);
             break;
         case DCBA:
+            data = (data | *mb_reg) << 16;
+            data = (data | *(mb_reg + 1));
+            data = ((data & (0x0000FFFF)) << 16) | ((data & (0xFFFF0000)) >> 16);
+            data = ((data & (0x00FF00FF)) << 8) | ((data & (0xFF00FF00)) >> 8);
+            break;
             break;
         default:
             break;
@@ -353,7 +358,6 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
     return r;
 }
 
-// example usage: mbdevice chp_template.csv /dev/ttyUSB0 115200 N 8 1
 int main(int argc, char *argv[])
 {
     int opt;

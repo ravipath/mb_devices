@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     }
     printf("CSV File: %s\n", argv[1]);
     if(argv[2] == NULL){
-        fprintf(stderr, "No output file provided. An outfut file with default name will be generated: %s\n", MAP_FILE_NAME);
+        fprintf(stderr, "Output filename was not provided. Using default ... %s\n", MAP_FILE_NAME);
         map_file = fopen(MAP_FILE_NAME, "wa");
     }else{
         map_file = fopen(argv[2], "wa");
@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
             return 0;
         }
     }
-    
 
     fprintf(map_file, "%s\n", starttext);
     fprintf(map_file, "%s\n", TAB);
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
             strcpy(single_line + curser, i_data);
             curser += strlen(i_data);
             strcpy(single_line + curser, "100");
-            curser += strlen("23");
+            curser += strlen("100");
             break;
         case MB_FLOAT32:
             strcpy(single_line + curser, f_data);
