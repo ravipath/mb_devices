@@ -94,7 +94,6 @@ uint32_t read_mb_register(uint8_t address, mbdevice_byteorder_t bo, uint8_t leng
             data = ((data & (0x0000FFFF)) << 16) | ((data & (0xFFFF0000)) >> 16);
             data = ((data & (0x00FF00FF)) << 8) | ((data & (0xFF00FF00)) >> 8);
             break;
-            break;
         default:
             break;
         }
@@ -234,10 +233,8 @@ void printlist(void)
 
 void insert_dev(mb_device_t *d)
 {
-    // if d is the first element
     if (HEAD == NULL)
     {
-        printf("*HEAD is NULL\n");
         HEAD = d;
         return;
     }
@@ -254,20 +251,18 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
     int r = 0;
     mb_device_t *l_dev = *d;
     l_dev->nxt = NULL;
-    // printf("element: %d\n", e);
     switch (e)
     {
     case INTEGRATE:
-        // char tok = data[0];
         l_dev->integrate = atoi((char *)data);
-        // printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, l_dev->integrate);
+        printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, l_dev->integrate);
         break;
     case INTERVAL:
         l_dev->interval = atoi((char *)data);
-        // printf("INTERVAL: %s | Inserted: %d\n", (char *)data, l_dev->interval);
+        printf("INTERVAL: %s | Inserted: %d\n", (char *)data, l_dev->interval);
         break;
     case KEY:
-        l_dev->name = (char *)malloc(strlen((char *)data));
+        l_dev->name = (char *)malloc(strlen((char *)data) + 1);
         if (l_dev->name == NULL)
         {
             r = -1;
@@ -276,11 +271,11 @@ int create_mb_device_elements(mb_device_t **d, mbdevice_element_t e, char *data)
         {
             strcpy(l_dev->name, (char *)data);
         }
-        // printf("KEY: %s | Inserted: %s\n", (char *)data, l_dev->name);
+        printf("KEY: %s | Inserted: %s\n", (char *)data, l_dev->name);
         break;
     case ADDRESS:
         l_dev->start_address = atoi((char *)data);
-        // printf("ADDRESS: %s | Inserted: %d\n", (char *)data, l_dev->start_address);
+        printf("ADDRESS: %s | Inserted: %d\n", (char *)data, l_dev->start_address);
         break;
     case FUNCTION_CODE:
         l_dev->fc = atoi((char *)data);
@@ -496,7 +491,6 @@ void *rtu_worker(void *ptr)
     ctx = modbus_new_tcp(d->ip, d->port);
     query = malloc(MODBUS_TCP_MAX_ADU_LENGTH);
     modbus_set_debug(ctx, TRUE);
-
     s = modbus_tcp_listen(ctx, d->unit_id);
     modbus_tcp_accept(ctx, &s);
 
@@ -513,12 +507,18 @@ void *rtu_worker(void *ptr)
         {
             /* Quit */
             printf("rc returned -1 for RECV\n");
-            // break;
+            printf("You may need to restart the server\n");
+            if(modbus_flush(ctx) != -1){
+                printf("flushed\n");
+            }
+            //break;
         }
         rc = modbus_reply(ctx, query, rc, modbus_register_map);
         if (rc == -1)
         {
             printf("rc returned -1 for REPLY \n");
+            printf("You may need to restart the server\n");
+            //break;
         }
     }
     modbus_close(ctx);
@@ -530,9 +530,9 @@ void *simulator_worker(void *ptr)
     uint32_t counter = 0;
     for (;;)
     {
-        system("clear");
-        mb_sim();
-        print_mb_map();
+        //system("clear");
+        //mb_sim();
+        //print_mb_map();
         sleep(5);
     }
 }

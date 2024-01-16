@@ -14,7 +14,13 @@ static char table[15][150] = {0, 0};
 static char *elements[] = {"NAME", "ADDRESS", "REGISTER", "FORMAT", "VALUE", "UNIT"};
 static int once = 1;
 
-static mb_device_data_map_t mb_data_map[] = {};
+static mb_device_data_map_t mb_data_map[] = {
+    {.start_addr = 0, .datatype = MB_INT16, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 100, .step = -1},
+    {.start_addr = 1, .datatype = MB_INT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 200, .step = -1},
+    {.start_addr = 3, .datatype = MB_INT32, .bo = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 300, .step = -1},
+    {.start_addr = 5, .datatype = MB_FLOAT32, .bo = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 1234.56, .step = -1},
+    {.start_addr = 7, .datatype = MB_FLOAT32, .bo = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 567.89, .step = -1},
+};
 
 size_t string_lengh(const char *s)
 {
@@ -24,7 +30,7 @@ size_t string_lengh(const char *s)
     return length;
 }
 
-static char *create_row(char *row_addr, char *str, int str_size)
+static char *create_row(char *row_addr, char *str, size_t str_size)
 {
     int char_counter = 0;
     int left_indent = 0, right_indent = 0;
@@ -133,20 +139,20 @@ int print_mb_map(void)
         row_counter++;
 
         // copy name
-        create_row(table[row_counter] + index_counter, temp->name, string_lengh(temp->name));
+        create_row(table[row_counter] + index_counter, temp->name, strlen(temp->name));
         index_counter += 21;
 
         // copy address
         char tmpstr[10] = {0};
         sprintf(tmpstr, "%d", temp->start_address);
-        tmp_len = string_lengh(tmpstr);
+        tmp_len = strlen(tmpstr);
         create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         index_counter += 21;
 
         // copy reg
         memset(tmpstr, 0, 10);
         sprintf(tmpstr, "%d", temp->regs);
-        tmp_len = string_lengh(tmpstr);
+        tmp_len = strlen(tmpstr);
         create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         index_counter += 21;
 
@@ -170,7 +176,7 @@ int print_mb_map(void)
             strcpy(tmpstr, "NA");
             break;
         }
-        tmp_len = string_lengh(tmpstr);
+        tmp_len = strlen(tmpstr);
         create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         // sprintf(tmpstr, "%d", temp->regs);
         // create_row(table[row_counter] + index_counter, temp->byteorder, string_lengh(temp->byteorder));
@@ -182,7 +188,7 @@ int print_mb_map(void)
         {
             uint32_t value = read_mb_register(temp->start_address, temp->byteorder, temp->regs);
             sprintf(tmpstr, "%d", value);
-            tmp_len = string_lengh(tmpstr);
+            tmp_len = strlen(tmpstr);
             create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         }
         if (temp->datatype == MB_FLOAT32)
@@ -191,14 +197,14 @@ int print_mb_map(void)
             int len = snprintf(NULL, 0, "%f", real);
             char *tmp_str = malloc(len + 1);
             snprintf(tmp_str, len + 1, "%f", real);
-            tmp_len = string_lengh(tmp_str);
+            tmp_len = strlen(tmp_str);
             create_row(table[row_counter] + index_counter, tmp_str, tmp_len);
             free(tmp_str);
         }
         index_counter += 21;
 
         // copy unit
-        create_row(table[row_counter] + index_counter, temp->unit, string_lengh(temp->unit));
+        create_row(table[row_counter] + index_counter, temp->unit, strlen(temp->unit));
         index_counter += 21;
 
         temp = temp->nxt;

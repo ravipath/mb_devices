@@ -31,7 +31,7 @@ typedef struct mb_device_data_map
 } mb_device_data_map_t;
 
 int mb_sim(void);
-static char *create_row(char *row_addr, char *str, int str_size);
+static char *create_row(char *row_addr, char *str, size_t str_size);
 int print_mb_map(void);
 
 #endif
