@@ -190,11 +190,11 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
     {
     case INTEGRATE:
         d->integrate = atoi((char *)data);
-        printf("INTEGRATE: %s | Inserted: %s\n", (char *)data, d->integrate);
+        printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, d->integrate);
         break;
     case INTERVAL:
         d->interval = atoi((char *)data);
-        printf("INTERVAL: %s | Inserted: %s\n", (char *)data, d->interval);
+        printf("INTERVAL: %s | Inserted: %d\n", (char *)data, d->interval);
         break;
     case KEY:
         d->name = (char *)malloc(strlen((char *)data));
@@ -280,7 +280,7 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         break;
     case SCALE_FACTOR:
         d->scale_factor = atoi((char *)data);
-        printf("SCALE_FACTOR: %s | Inserted: %s\n", (char *)data, d->scale_factor);
+        printf("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, d->scale_factor);
         break;
     }
     return r;
