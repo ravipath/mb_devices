@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "mb_device_tcp.h"
+#include "mb_device_rtu.h"
 #include "mb_sim.h"
 
 #define DELIMITER "|"
@@ -29,7 +29,7 @@ static mb_device_data_map_t mb_data_map[] = {
     {.start_addr = 17, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
     {.start_addr = 18, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
     {.start_addr = 19, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 45, .step = -1},
-    {.start_addr = 20, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 217, .step = -1},
+    /*{.start_addr = 20, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 217, .step = -1},
     {.start_addr = 21, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
     {.start_addr = 22, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
     {.start_addr = 24, .datatype = MB_INT32, .format = CDAB, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
@@ -38,7 +38,7 @@ static mb_device_data_map_t mb_data_map[] = {
     {.start_addr = 30, .datatype = MB_FLOAT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
     {.start_addr = 32, .datatype = MB_FLOAT32, .format = CDAB, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
     {.start_addr = 34, .datatype = MB_FLOAT32, .format = BADC, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
-    {.start_addr = 36, .datatype = MB_FLOAT32, .format = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},
+    {.start_addr = 36, .datatype = MB_FLOAT32, .format = DCBA, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.f_data = 0.0, .step = -1},*/
 };
 
 size_t string_lengh(const char *s)

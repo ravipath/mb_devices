@@ -36,8 +36,12 @@ mb_device_t *get_head(void)
 
 void print_usage(void)
 {
-    fprintf(stderr, "Usage: mb_device [-f csv_file_path] [-p port]\n");
-    fprintf(stderr, "          [-p] port (e.g., 501)\n");
+    fprintf(stderr, "Usage: [-f csv_file_path]\n");
+    fprintf(stderr, "          [-t] serial device name (e.g., /dev/ttyXXX)\n");
+    fprintf(stderr, "          [-b] baudrate (e.g., 115200, 9600,...) \n");
+    fprintf(stderr, "          [-p] parity (E for even,O for odd, N for no parity)\n");
+    fprintf(stderr, "          [-d] databits(number of data bits, for e.g., 8)\n");
+    fprintf(stderr, "          [-s] stop bits(1 or 0)\n");
 }
 
 float read_mb_register_f32(uint8_t address, mbdevice_byteorder_t bo, uint8_t length)
@@ -336,6 +340,7 @@ int main(int argc, char *argv[])
                 printf("malloc error: cannot allocate memory for serial device %s\n", optarg);
                 return 0;
             }
+            printf("memory allocated for serial device name\n");
             strcpy(s->dev, optarg);
             break;
 
@@ -359,6 +364,12 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (csv_file == NULL)
+    {
+        printf("file error: no csv file was found\n");
+        print_usage();
+        return 0;
+    }
     if (s->baud == -1)
     {
         printf("baud error: baud not set\n");
@@ -383,6 +394,7 @@ int main(int argc, char *argv[])
         print_usage();
         return 0;
     }
+    printf("reading csv file now\n");
 
     // read and ignore first line since this contains csv headers
     // Appropriate check must be coded later to asscertain consistency with the csv template
