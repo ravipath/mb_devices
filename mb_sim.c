@@ -18,17 +18,17 @@ static mb_device_data_map_t mb_data_map[] = {
     {.start_addr = 0, .datatype = MB_INT32, .format = ABCD, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 78200, .step = 20},
     {.start_addr = 2, .datatype = MB_INT32, .format = ABCD, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 56830, .step = 1},
     {.start_addr = 4, .datatype = MB_INT32, .format = ABCD, .dp_value_range = RANGE, .max_value = 436, .min_value = 177, .value.i_data = -1, .step = -1},
-    {.start_addr = 6, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 8, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 84693176, .step = -1},
+    {.start_addr = 6, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 596, .step = -1},
+    {.start_addr = 8, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 123456789, .step = -1},
     {.start_addr = 10, .datatype = MB_INT32, .format = ABCD, .dp_value_range = RANGE, .max_value = 16, .min_value = 8, .value.i_data = -1, .step = -1},
     {.start_addr = 12, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
     {.start_addr = 13, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 52, .min_value = 50, .value.i_data = -1, .step = -1},
     {.start_addr = 14, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 74, .min_value = 72, .value.i_data = -1, .step = -1},
     {.start_addr = 15, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 23, .min_value = 21, .value.i_data = -1, .step = -1},
     {.start_addr = 16, .datatype = MB_INT16, .format = ABCD, .dp_value_range = INCREASING, .max_value = -1, .min_value = -1, .value.i_data = 4600, .step = 1},
-    {.start_addr = 17, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 18, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
-    {.start_addr = 19, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 45, .step = -1},
+    {.start_addr = 17, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 2926, .step = -1},
+    {.start_addr = 18, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 963, .step = -1},
+    {.start_addr = 19, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 2173, .step = -1},
     /*{.start_addr = 20, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 217, .step = -1},
     {.start_addr = 21, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
     {.start_addr = 22, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 82, .step = -1},
@@ -55,10 +55,11 @@ static char *create_row(char *row_addr, char *str, int str_size)
     int left_indent = 0, right_indent = 0;
 
     int tmp_len = str_size;
+    // printf("length of %s is %d\n", str, str_size);
     if (tmp_len >= MAX_STR_LEN)
     {
         char tmp_str[16] = {0};
-        memcpy(tmp_str, str, 15);
+        memcpy(tmp_str, str, 16);
         left_indent = 2;
         right_indent = 2;
     }
@@ -104,7 +105,7 @@ int print_mb_map(void)
 
     for (int n = 0; n < elements_length; n++)
     {
-        int tmp_len = string_lengh(elements[n]);
+        int tmp_len = strlen(elements[n]);
         if (tmp_len > MAX_STR_LEN)
         {
             char tmp_str[18] = {0};
@@ -136,8 +137,8 @@ int print_mb_map(void)
             char_counter++;
             left_indent--;
         }
-        memcpy(table[0] + char_counter, elements[n], string_lengh(elements[n]));
-        char_counter += string_lengh(elements[n]);
+        memcpy(table[0] + char_counter, elements[n], strlen(elements[n]));
+        char_counter += strlen(elements[n]);
         while (right_indent)
         {
             memcpy(table[0] + char_counter, " ", 1);
@@ -156,20 +157,20 @@ int print_mb_map(void)
         row_counter++;
 
         // copy name
-        create_row(table[row_counter] + index_counter, temp->name, string_lengh(temp->name));
+        create_row(table[row_counter] + index_counter, temp->name, strlen(temp->name));
         index_counter += 21;
 
         // copy address
         char tmpstr[10] = {0};
         sprintf(tmpstr, "%d", temp->start_address);
-        tmp_len = string_lengh(tmpstr);
+        tmp_len = strlen(tmpstr);
         create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         index_counter += 21;
 
         // copy reg
         memset(tmpstr, 0, 10);
         sprintf(tmpstr, "%d", temp->regs);
-        tmp_len = string_lengh(tmpstr);
+        tmp_len = strlen(tmpstr);
         create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         index_counter += 21;
 
@@ -193,10 +194,10 @@ int print_mb_map(void)
             strcpy(tmpstr, "NA");
             break;
         }
-        tmp_len = string_lengh(tmpstr);
+        tmp_len = strlen(tmpstr);
         create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         // sprintf(tmpstr, "%d", temp->regs);
-        // create_row(table[row_counter] + index_counter, temp->byteorder, string_lengh(temp->byteorder));
+        // create_row(table[row_counter] + index_counter, temp->byteorder, strlen(temp->byteorder));
         index_counter += 21;
 
         // copy value
@@ -205,7 +206,7 @@ int print_mb_map(void)
         {
             uint32_t value = read_mb_register(temp->start_address, temp->byteorder, temp->regs);
             sprintf(tmpstr, "%d", value);
-            tmp_len = string_lengh(tmpstr);
+            tmp_len = strlen(tmpstr);
             create_row(table[row_counter] + index_counter, tmpstr, tmp_len);
         }
         if (temp->datatype == MB_FLOAT32)
@@ -214,14 +215,14 @@ int print_mb_map(void)
             int len = snprintf(NULL, 0, "%f", real);
             char *tmp_str = malloc(len + 1);
             snprintf(tmp_str, len + 1, "%f", real);
-            tmp_len = string_lengh(tmp_str);
+            tmp_len = strlen(tmp_str);
             create_row(table[row_counter] + index_counter, tmp_str, tmp_len);
             free(tmp_str);
         }
         index_counter += 21;
 
         // copy unit
-        create_row(table[row_counter] + index_counter, temp->unit, string_lengh(temp->unit));
+        create_row(table[row_counter] + index_counter, temp->unit, strlen(temp->unit));
         index_counter += 21;
 
         temp = temp->nxt;

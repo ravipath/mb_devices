@@ -197,7 +197,7 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         printf("INTERVAL: %s | Inserted: %d\n", (char *)data, d->interval);
         break;
     case KEY:
-        d->name = (char *)malloc(strlen((char *)data));
+        d->name = (char *)malloc(strlen((char *)data) + 1);
         if (d->name == NULL)
         {
             r = -1;
@@ -267,7 +267,7 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         printf("BO: %s | Inserted: %d\n", (char *)data, d->byteorder);
         break;
     case UNIT:
-        d->unit = (char *)malloc(strlen((char *)data));
+        d->unit = (char *)malloc(strlen((char *)data) + 1);
         if (d->unit == NULL)
         {
             r = -1;
@@ -453,6 +453,10 @@ void *rtu_worker(void *ptr)
     mb_rtu_client_config_t *s = ptr; //(mb_rtu_client_config_t *)malloc(sizeof(mb_rtu_client_config_t));
 
     ctx = modbus_new_rtu(s->dev, s->baud, s->parity, s->databits, s->stopbits); // serial_device, baud, parity, databits, stopbits);
+    if (ctx == NULL)
+    {
+        fprintf(stderr, "Could not allocate the serial device context.\nThe program will Exit\n");
+    }
     modbus_set_slave(ctx, 1);
 
     query = malloc(MODBUS_RTU_MAX_ADU_LENGTH);
@@ -496,7 +500,7 @@ void *simulator_worker(void *ptr)
     uint32_t counter = 0;
     for (;;)
     {
-        // system("clear");
+        system("clear");
         mb_sim();
         print_mb_map();
         // write_mb_register_float32(20, 1234.37);
