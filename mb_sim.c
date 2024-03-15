@@ -21,7 +21,7 @@ static mb_device_data_map_t mb_data_map[] = {
     {.start_addr = 6, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 596, .step = -1},
     {.start_addr = 8, .datatype = MB_INT32, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 123456789, .step = -1},
     {.start_addr = 10, .datatype = MB_INT32, .format = ABCD, .dp_value_range = RANGE, .max_value = 16, .min_value = 8, .value.i_data = -1, .step = -1},
-    {.start_addr = 12, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 0, .step = -1},
+    {.start_addr = 12, .datatype = MB_INT16, .format = ABCD, .dp_value_range = CONSTANT, .max_value = -1, .min_value = -1, .value.i_data = 732190, .step = -1},
     {.start_addr = 13, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 52, .min_value = 50, .value.i_data = -1, .step = -1},
     {.start_addr = 14, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 74, .min_value = 72, .value.i_data = -1, .step = -1},
     {.start_addr = 15, .datatype = MB_INT16, .format = ABCD, .dp_value_range = RANGE, .max_value = 23, .min_value = 21, .value.i_data = -1, .step = -1},
@@ -272,14 +272,17 @@ int mb_sim(void)
             }
             else
             {
+                printf("INCREASING: Writing %d at address %d\n", mb_data_map[count].value.i_data, temp->start_address);
                 write_mb_register(temp->start_address, temp->byteorder, temp->regs, mb_data_map[count].value.i_data);
                 i_data = mb_data_map[count].value.i_data;
                 mb_data_map[count].value.i_data = i_data + mb_data_map[count].step;
+                i_data = mb_data_map[count].value.i_data;
             }
         }
         else if (mb_data_map[count].dp_value_range == RANGE)
         {
             i_data = generate_random_number(mb_data_map[count].min_value, mb_data_map[count].max_value);
+            printf("RANGE: Writing %d at address %d\n", i_data, temp->start_address);
             write_mb_register(temp->start_address, temp->byteorder, temp->regs, i_data);
         }
         else if (mb_data_map[count].dp_value_range == CONSTANT)
@@ -316,7 +319,9 @@ int mb_sim(void)
             }
             else
             {
-                write_mb_register(temp->start_address, temp->regs, mb_data_map[count].format, mb_data_map[count].value.i_data);
+                // i_data = mb_data_map[count].value.i_data;
+                printf("CONSTANT: Writing %d at address %d\n", mb_data_map[count].value.i_data, temp->start_address);
+                write_mb_register(temp->start_address, temp->byteorder, temp->regs, mb_data_map[count].value.i_data);
             }
         }
         // write_mb_register_float32

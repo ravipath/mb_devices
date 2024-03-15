@@ -12,18 +12,24 @@
 #include "mb_sim.h"
 
 #define UNIT_ID 1
+#define DEBUG 1
 
 #ifdef DEBUG
-#define DEBUG_PRINT(...)              \
-    do                                \
-    {                                 \
-        fprintf(stderr, __VA_ARGS__); \
-    } while (false)
+#define DEBUG_PRINT(...)     \
+    do                       \
+    {                        \
+        printf(__VA_ARGS__); \
+    } while (0)
+#define DEBUG_FPRINT(...)                  \
+    do                                     \
+    {                                      \
+        fprintf(stderr, fmt, __VA_ARGS__); \
+    } while (0)
 #else
 #define DEBUG_PRINT(...) \
     do                   \
     {                    \
-    } while (false)
+    } while (0)
 #endif
 
 static mb_device_t *HEAD = NULL;
@@ -36,18 +42,18 @@ mb_device_t *get_head(void)
 
 void print_usage(void)
 {
-    fprintf(stderr, "Usage: [-f csv_file_path]\n");
-    fprintf(stderr, "          [-t] serial device name (e.g., /dev/ttyXXX)\n");
-    fprintf(stderr, "          [-b] baudrate (e.g., 115200, 9600,...) \n");
-    fprintf(stderr, "          [-p] parity (E for even,O for odd, N for no parity)\n");
-    fprintf(stderr, "          [-d] databits(number of data bits, for e.g., 8)\n");
-    fprintf(stderr, "          [-s] stop bits(1 or 0)\n");
+    DEBUG_PRINT("Usage: [-f csv_file_path]\n");
+    DEBUG_PRINT("          [-t] serial device name (e.g., /dev/ttyXXX)\n");
+    DEBUG_PRINT("          [-b] baudrate (e.g., 115200, 9600,...) \n");
+    DEBUG_PRINT("          [-p] parity (E for even,O for odd, N for no parity)\n");
+    DEBUG_PRINT("          [-d] databits(number of data bits, for e.g., 8)\n");
+    DEBUG_PRINT("          [-s] stop bits(1 or 0)\n");
 }
 
 float read_mb_register_f32(uint8_t address, mbdevice_byteorder_t bo, uint8_t length)
 {
     float real = modbus_get_float_abcd(modbus_register_map->tab_registers + address);
-    printf("REAL: %f\n", real);
+    DEBUG_PRINT("REAL: %f\n", real);
     return real;
 }
 
@@ -104,7 +110,7 @@ uint32_t calc_num_datapoints(void)
     mb_device_t *temp = HEAD;
     if (temp == NULL)
     {
-        printf("list empty\n");
+        DEBUG_PRINT("list empty\n");
         return 0;
     }
 
@@ -124,7 +130,7 @@ uint32_t calc_num_modbus_registers(void)
     mb_device_t *temp = HEAD;
     if (temp == NULL)
     {
-        printf("list empty\n");
+        DEBUG_PRINT("list empty\n");
         return 0;
     }
 
@@ -144,23 +150,23 @@ void printlist(void)
     mb_device_t *temp = HEAD;
     if (temp == NULL)
     {
-        printf("list empty\n");
+        DEBUG_PRINT("list empty\n");
         return;
     }
     uint8_t counter = 0;
     while (temp != NULL)
     {
-        printf("---------\n");
-        printf("element %d\n", counter++);
-        printf("---------\n");
-        printf("name: %s\n", temp->name);
-        printf("byteorder: %s\n", temp->byteorder);
-        printf("datatype: %d\n", temp->datatype);
-        printf("unit: %s\n", temp->unit);
-        printf("fc: %d\n", temp->fc);
-        printf("start address: %d\n", temp->start_address);
-        printf("regs: %d\n", temp->regs);
-        printf("scale_factor: %d\n", temp->scale_factor);
+        DEBUG_PRINT("---------\n");
+        DEBUG_PRINT("element %d\n", counter++);
+        DEBUG_PRINT("---------\n");
+        DEBUG_PRINT("name: %s\n", temp->name);
+        DEBUG_PRINT("byteorder: %s\n", temp->byteorder);
+        DEBUG_PRINT("datatype: %d\n", temp->datatype);
+        DEBUG_PRINT("unit: %s\n", temp->unit);
+        DEBUG_PRINT("fc: %d\n", temp->fc);
+        DEBUG_PRINT("start address: %d\n", temp->start_address);
+        DEBUG_PRINT("regs: %d\n", temp->regs);
+        DEBUG_PRINT("scale_factor: %d\n", temp->scale_factor);
         temp = temp->nxt;
     }
 }
@@ -170,7 +176,7 @@ void insert_dev(mb_device_t *d)
     // if d is the first element
     if (HEAD == NULL)
     {
-        printf("*HEAD is NULL\n");
+        DEBUG_PRINT("*HEAD is NULL\n");
         HEAD = d;
         return;
     }
@@ -190,11 +196,11 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
     {
     case INTEGRATE:
         d->integrate = atoi((char *)data);
-        printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, d->integrate);
+        DEBUG_PRINT("INTEGRATE: %s | Inserted: %d\n", (char *)data, d->integrate);
         break;
     case INTERVAL:
         d->interval = atoi((char *)data);
-        printf("INTERVAL: %s | Inserted: %d\n", (char *)data, d->interval);
+        DEBUG_PRINT("INTERVAL: %s | Inserted: %d\n", (char *)data, d->interval);
         break;
     case KEY:
         d->name = (char *)malloc(strlen((char *)data) + 1);
@@ -206,19 +212,19 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         {
             strcpy(d->name, (char *)data);
         }
-        printf("KEY: %s | Inserted: %s\n", (char *)data, d->name);
+        DEBUG_PRINT("KEY: %s | Inserted: %s\n", (char *)data, d->name);
         break;
     case ADDRESS:
         d->start_address = atoi((char *)data);
-        printf("ADDRESS: %s | Inserted: %d\n", (char *)data, d->start_address);
+        DEBUG_PRINT("ADDRESS: %s | Inserted: %d\n", (char *)data, d->start_address);
         break;
     case FUNCTION_CODE:
         d->fc = atoi((char *)data);
-        printf("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, d->fc);
+        DEBUG_PRINT("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, d->fc);
         break;
     case REGISTERS:
         d->regs = atoi((char *)data);
-        printf("REGISTERS: %s | Inserted: %d\n", (char *)data, d->regs);
+        DEBUG_PRINT("REGISTERS: %s | Inserted: %d\n", (char *)data, d->regs);
         break;
     case FORMAT:
         if (strcmp((char *)data, "INT8") == 0)
@@ -242,7 +248,7 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
             d->datatype = MB_UNKNOWN;
         }
         break;
-        printf("FORMAT: %s | Inserted: %d\n", (char *)data, d->datatype);
+        DEBUG_PRINT("FORMAT: %s | Inserted: %d\n", (char *)data, d->datatype);
     case BO:
         if (strcmp((char *)data, "ABCD") == 0)
         {
@@ -264,7 +270,7 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         {
             d->byteorder = MB_UNKNOWN;
         }
-        printf("BO: %s | Inserted: %d\n", (char *)data, d->byteorder);
+        DEBUG_PRINT("BO: %s | Inserted: %d\n", (char *)data, d->byteorder);
         break;
     case UNIT:
         d->unit = (char *)malloc(strlen((char *)data) + 1);
@@ -276,11 +282,11 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         {
             strcpy(d->unit, (char *)data);
         }
-        printf("UNIT: %s | Inserted: %s\n", (char *)data, d->unit);
+        DEBUG_PRINT("UNIT: %s | Inserted: %s\n", (char *)data, d->unit);
         break;
     case SCALE_FACTOR:
         d->scale_factor = atoi((char *)data);
-        printf("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, d->scale_factor);
+        DEBUG_PRINT("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, d->scale_factor);
         break;
     }
     return r;
@@ -314,15 +320,16 @@ int main(int argc, char *argv[])
     mbdevice_element_t element;
     mb_device_t *dev = NULL;
 
-    while ((opt = getopt(argc, argv, "f:t:b:p:d:s:")) != EOF)
+    while ((opt = getopt(argc, argv, "ftbpds")) != EOF)
     {
+        DEBUG_PRINT("ARGS opt = %d\n", opt);
         switch (opt)
         {
         case 'f':
             csv_file = fopen(optarg, "r");
             if (csv_file == NULL)
             {
-                printf("%s: %s\n", optarg, strerror(errno));
+                DEBUG_PRINT("%s: %s\n", optarg, strerror(errno));
                 return 0;
             }
             break;
@@ -330,17 +337,17 @@ int main(int argc, char *argv[])
         case 't':
             if (strlen(optarg) == 0)
             {
-                printf("serial device name error: name cannot be blank. see usage\n");
+                DEBUG_PRINT("serial device name error: name cannot be blank. see usage\n");
                 print_usage();
                 return 0;
             }
             s->dev = (char *)malloc(strlen(optarg) + 1);
             if (s->dev == NULL)
             {
-                printf("malloc error: cannot allocate memory for serial device %s\n", optarg);
+                DEBUG_PRINT("malloc error: cannot allocate memory for serial device %s\n", optarg);
                 return 0;
             }
-            printf("memory allocated for serial device name\n");
+            DEBUG_PRINT("memory allocated for serial device name\n");
             strcpy(s->dev, optarg);
             break;
 
@@ -359,42 +366,42 @@ int main(int argc, char *argv[])
             s->stopbits = atoi(optarg);
             break;
         default:
-            printf("unknown argument: %s\n", optarg);
+            DEBUG_PRINT("unknown argument: %s\n", optarg);
             break;
         }
     }
 
     if (csv_file == NULL)
     {
-        printf("file error: no csv file was found\n");
+        DEBUG_PRINT("file error: no csv file was found\n");
         print_usage();
         return 0;
     }
     if (s->baud == -1)
     {
-        printf("baud error: baud not set\n");
+        DEBUG_PRINT("baud error: baud not set\n");
         print_usage();
         return 0;
     }
     if (s->parity == 'a')
     {
-        printf("parity error: parity not set\n");
+        DEBUG_PRINT("parity error: parity not set\n");
         print_usage();
         return 0;
     }
     if (s->databits == -1)
     {
-        printf("databits error: databits not set\n");
+        DEBUG_PRINT("databits error: databits not set\n");
         print_usage();
         return 0;
     }
     if (s->stopbits == 'P')
     {
-        printf("stop bits error: stop bits not set.\n");
+        DEBUG_PRINT("stop bits error: stop bits not set.\n");
         print_usage();
         return 0;
     }
-    printf("reading csv file now\n");
+    DEBUG_PRINT("reading csv file now\n");
 
     // read and ignore first line since this contains csv headers
     // Appropriate check must be coded later to asscertain consistency with the csv template
@@ -421,7 +428,7 @@ int main(int argc, char *argv[])
     // printlist();
 
     uint32_t num_modbus_registers = calc_num_modbus_registers();
-    printf("Number of modbus regs: %d\n", num_modbus_registers);
+    DEBUG_PRINT("Number of modbus regs: %d\n", num_modbus_registers);
     modbus_register_map = modbus_mapping_new_start_address(0,
                                                            0,
                                                            0,
@@ -431,7 +438,7 @@ int main(int argc, char *argv[])
                                                            0,
                                                            0);
 
-    printf("Creating threads\n");
+    DEBUG_PRINT("Creating threads\n");
 
     r_th = pthread_create(&rtu_thread, NULL, rtu_worker, s);
     r_th = pthread_create(&simulator_thread, NULL, simulator_worker, (void *)NULL);
@@ -442,7 +449,7 @@ int main(int argc, char *argv[])
     free(s->dev);
     free(s);
     modbus_mapping_free(modbus_register_map);
-    printf("exiting the MAIN application ...\n");
+    DEBUG_PRINT("exiting the MAIN application ...\n");
 }
 
 void *rtu_worker(void *ptr)
@@ -455,20 +462,20 @@ void *rtu_worker(void *ptr)
     ctx = modbus_new_rtu(s->dev, s->baud, s->parity, s->databits, s->stopbits); // serial_device, baud, parity, databits, stopbits);
     if (ctx == NULL)
     {
-        fprintf(stderr, "Could not allocate the serial device context.\nThe program will Exit\n");
+        DEBUG_PRINT("Could not allocate the serial device context.\nThe program will Exit\n");
     }
     modbus_set_slave(ctx, 1);
 
     query = malloc(MODBUS_RTU_MAX_ADU_LENGTH);
-    printf("query\n");
+    DEBUG_PRINT("query\n");
     modbus_set_debug(ctx, TRUE);
-    printf("modbus_set_debug\n");
+    DEBUG_PRINT("modbus_set_debug\n");
     if (modbus_connect(ctx) == -1)
     {
-        fprintf(stderr, "Unable to connect %s\n", modbus_strerror(errno));
+        DEBUG_PRINT("Unable to connect %s\n", modbus_strerror(errno));
         modbus_free(ctx);
     }
-    printf("modbus_connect\n");
+    DEBUG_PRINT("modbus_connect\n");
 
     for (;;)
     {
@@ -482,13 +489,13 @@ void *rtu_worker(void *ptr)
         if (rc == -1 && errno != EMBBADCRC)
         {
             /* Quit */
-            printf("rc returned -1 for RECV\n");
+            DEBUG_PRINT("rc returned -1 for RECV\n");
             // break;
         }
         rc = modbus_reply(ctx, query, rc, modbus_register_map);
         if (rc == -1)
         {
-            printf("rc returned -1 for REPLY \n");
+            DEBUG_PRINT("rc returned -1 for REPLY \n");
         }
     }
     modbus_close(ctx);
@@ -500,7 +507,7 @@ void *simulator_worker(void *ptr)
     uint32_t counter = 0;
     for (;;)
     {
-        system("clear");
+        // system("clear");
         mb_sim();
         print_mb_map();
         // write_mb_register_float32(20, 1234.37);
