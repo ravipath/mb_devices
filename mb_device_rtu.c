@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
     mbdevice_element_t element;
     mb_device_t *dev = NULL;
 
-    while ((opt = getopt(argc, argv, "ftbpds")) != EOF)
+    while ((opt = getopt(argc, argv, "f:t:b:p:d:s:")) != EOF)
     {
         DEBUG_PRINT("ARGS opt = %d\n", opt);
         switch (opt)
