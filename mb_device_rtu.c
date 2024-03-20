@@ -500,10 +500,7 @@ void *simulator_worker(void *ptr)
     uint32_t counter = 0;
     for (;;)
     {
-        system("clear");
         mb_sim();
-        print_mb_map();
-        // write_mb_register_float32(20, 1234.37);
         sleep(5);
     }
 }
