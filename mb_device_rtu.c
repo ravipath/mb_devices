@@ -104,7 +104,7 @@ uint32_t calc_num_datapoints(void)
     mb_device_t *temp = HEAD;
     if (temp == NULL)
     {
-        printf("list empty\n");
+        // printf("list empty\n");
         return 0;
     }
 
@@ -170,7 +170,7 @@ void insert_dev(mb_device_t *d)
     // if d is the first element
     if (HEAD == NULL)
     {
-        printf("*HEAD is NULL\n");
+        // printf("*HEAD is NULL\n");
         HEAD = d;
         return;
     }
@@ -190,11 +190,11 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
     {
     case INTEGRATE:
         d->integrate = atoi((char *)data);
-        printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, d->integrate);
+        // printf("INTEGRATE: %s | Inserted: %d\n", (char *)data, d->integrate);
         break;
     case INTERVAL:
         d->interval = atoi((char *)data);
-        printf("INTERVAL: %s | Inserted: %d\n", (char *)data, d->interval);
+        // printf("INTERVAL: %s | Inserted: %d\n", (char *)data, d->interval);
         break;
     case KEY:
         d->name = (char *)malloc(strlen((char *)data) + 1);
@@ -206,19 +206,19 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         {
             strcpy(d->name, (char *)data);
         }
-        printf("KEY: %s | Inserted: %s\n", (char *)data, d->name);
+        // printf("KEY: %s | Inserted: %s\n", (char *)data, d->name);
         break;
     case ADDRESS:
         d->start_address = atoi((char *)data);
-        printf("ADDRESS: %s | Inserted: %d\n", (char *)data, d->start_address);
+        // printf("ADDRESS: %s | Inserted: %d\n", (char *)data, d->start_address);
         break;
     case FUNCTION_CODE:
         d->fc = atoi((char *)data);
-        printf("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, d->fc);
+        // printf("FUNCTION_CODE: %s | Inserted: %d\n", (char *)data, d->fc);
         break;
     case REGISTERS:
         d->regs = atoi((char *)data);
-        printf("REGISTERS: %s | Inserted: %d\n", (char *)data, d->regs);
+        // printf("REGISTERS: %s | Inserted: %d\n", (char *)data, d->regs);
         break;
     case FORMAT:
         if (strcmp((char *)data, "INT8") == 0)
@@ -242,7 +242,7 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
             d->datatype = MB_UNKNOWN;
         }
         break;
-        printf("FORMAT: %s | Inserted: %d\n", (char *)data, d->datatype);
+        // printf("FORMAT: %s | Inserted: %d\n", (char *)data, d->datatype);
     case BO:
         if (strcmp((char *)data, "ABCD") == 0)
         {
@@ -264,7 +264,7 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         {
             d->byteorder = MB_UNKNOWN;
         }
-        printf("BO: %s | Inserted: %d\n", (char *)data, d->byteorder);
+        // printf("BO: %s | Inserted: %d\n", (char *)data, d->byteorder);
         break;
     case UNIT:
         d->unit = (char *)malloc(strlen((char *)data) + 1);
@@ -276,11 +276,11 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
         {
             strcpy(d->unit, (char *)data);
         }
-        printf("UNIT: %s | Inserted: %s\n", (char *)data, d->unit);
+        // printf("UNIT: %s | Inserted: %s\n", (char *)data, d->unit);
         break;
     case SCALE_FACTOR:
         d->scale_factor = atoi((char *)data);
-        printf("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, d->scale_factor);
+        // printf("SCALE_FACTOR: %s | Inserted: %d\n", (char *)data, d->scale_factor);
         break;
     }
     return r;
@@ -302,99 +302,23 @@ int main(int argc, char *argv[])
     int r_th = 0;
 
     mb_rtu_client_config_t *s = (mb_rtu_client_config_t *)malloc(sizeof(mb_rtu_client_config_t));
-    s->dev = NULL;
-    s->baud = -1;
-    s->databits = -1;
-    s->stopbits = -1;
-    s->parity = 'a';
+    s->dev = "/dev/ttyUSB0";
+    s->baud = 9600;
+    s->databits = 8;
+    s->stopbits = 1;
+    s->parity = 'N';
 
     // cmdline args
     FILE *csv_file = NULL;
 
     mbdevice_element_t element;
     mb_device_t *dev = NULL;
-
-    while ((opt = getopt(argc, argv, "f:t:b:p:d:s:")) != EOF)
-    {
-        switch (opt)
-        {
-        case 'f':
-            csv_file = fopen(optarg, "r");
-            if (csv_file == NULL)
-            {
-                printf("%s: %s\n", optarg, strerror(errno));
-                return 0;
-            }
-            break;
-
-        case 't':
-            if (strlen(optarg) == 0)
-            {
-                printf("serial device name error: name cannot be blank. see usage\n");
-                print_usage();
-                return 0;
-            }
-            s->dev = (char *)malloc(strlen(optarg) + 1);
-            if (s->dev == NULL)
-            {
-                printf("malloc error: cannot allocate memory for serial device %s\n", optarg);
-                return 0;
-            }
-            printf("memory allocated for serial device name\n");
-            strcpy(s->dev, optarg);
-            break;
-
-        case 'b':
-            s->baud = atoi(optarg);
-            break;
-
-        case 'p':
-            s->parity = *optarg;
-            break;
-
-        case 'd':
-            s->databits = atoi(optarg);
-            break;
-        case 's':
-            s->stopbits = atoi(optarg);
-            break;
-        default:
-            printf("unknown argument: %s\n", optarg);
-            break;
-        }
-    }
-
+    csv_file = fopen("chp_simulator_dp.csv", "r");
     if (csv_file == NULL)
     {
-        printf("file error: no csv file was found\n");
-        print_usage();
+        printf("%s: %s\n", optarg, strerror(errno));
         return 0;
     }
-    if (s->baud == -1)
-    {
-        printf("baud error: baud not set\n");
-        print_usage();
-        return 0;
-    }
-    if (s->parity == 'a')
-    {
-        printf("parity error: parity not set\n");
-        print_usage();
-        return 0;
-    }
-    if (s->databits == -1)
-    {
-        printf("databits error: databits not set\n");
-        print_usage();
-        return 0;
-    }
-    if (s->stopbits == 'P')
-    {
-        printf("stop bits error: stop bits not set.\n");
-        print_usage();
-        return 0;
-    }
-    printf("reading csv file now\n");
 
     // read and ignore first line since this contains csv headers
     // Appropriate check must be coded later to asscertain consistency with the csv template

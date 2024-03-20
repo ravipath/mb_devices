@@ -116,7 +116,7 @@ int mb_sim(void)
             }
             else
             {
-                write_mb_register(temp->start_address, temp->regs, mb_data_map[count].format, mb_data_map[count].value.i_data);
+                write_mb_register(temp->start_address, temp->byteorder, temp->regs, mb_data_map[count].value.i_data);
             }
         }
         // write_mb_register_float32
