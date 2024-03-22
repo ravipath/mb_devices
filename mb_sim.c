@@ -10,8 +10,6 @@
 #define FORMAT "ABCD"
 #define MAX_STR_LEN 18
 
-static char table[15][150] = {0, 0};
-static char *elements[] = {"NAME", "ADDRESS", "REGISTER", "FORMAT", "VALUE", "UNIT"};
 static int once = 1;
 
 static mb_device_data_map_t mb_data_map[] = {
@@ -53,14 +51,12 @@ int mb_sim(void)
     uint8_t count = 0;
     float f_data;
     uint32_t i_data;
-    int i = 0;
     if (!once)
     {
         return 0;
     }
     while (temp != NULL)
     {
-        uint8_t index = temp->start_address;
         if (mb_data_map[count].dp_value_range == INCREASING)
         {
 
@@ -124,4 +120,5 @@ int mb_sim(void)
         count++;
         once = 0;
     }
+    return 0;
 }

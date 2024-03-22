@@ -74,7 +74,6 @@ uint32_t read_mb_register(uint8_t address, mbdevice_byteorder_t bo, uint8_t leng
 void write_mb_register_float32(uint16_t offset, mbdevice_byteorder_t bo, float data)
 {
     uint16_t *mb_reg_offset = modbus_register_map->tab_registers + offset;
-    float real;
     modbus_set_float_badc(data, mb_reg_offset);
 }
 
@@ -154,7 +153,7 @@ void printlist(void)
         printf("element %d\n", counter++);
         printf("---------\n");
         printf("name: %s\n", temp->name);
-        printf("byteorder: %s\n", temp->byteorder);
+        printf("byteorder: %d\n", temp->byteorder);
         printf("datatype: %d\n", temp->datatype);
         printf("unit: %s\n", temp->unit);
         printf("fc: %d\n", temp->fc);
@@ -289,17 +288,12 @@ int create_mb_device_elements(mb_device_t *d, mbdevice_element_t e, void *data)
 // example usage: mbdevice chp_template.csv /dev/ttyUSB0 115200 N 8 1
 int main(int argc, char *argv[])
 {
-    int opt;
     char buf[1024] = {0};
     char *bufPtr = buf;
-    int count = 0;
-    int elements_processed = 0;
     uint8_t line_index = 0;
 
     // pthread
     pthread_t rtu_thread, simulator_thread;
-    pthread_mutex_t mutex;
-    int r_th = 0;
 
     mb_rtu_client_config_t *s = (mb_rtu_client_config_t *)malloc(sizeof(mb_rtu_client_config_t));
     s->dev = "/dev/ttyUSB0";
@@ -311,12 +305,11 @@ int main(int argc, char *argv[])
     // cmdline args
     FILE *csv_file = NULL;
 
-    mbdevice_element_t element;
     mb_device_t *dev = NULL;
     csv_file = fopen("chp_simulator_dp.csv", "r");
     if (csv_file == NULL)
     {
-        printf("%s: %s\n", optarg, strerror(errno));
+        printf("Failed to open CSV file: %s\n", strerror(errno));
         return 0;
     }
 
@@ -357,8 +350,16 @@ int main(int argc, char *argv[])
 
     printf("Creating threads\n");
 
-    r_th = pthread_create(&rtu_thread, NULL, rtu_worker, s);
-    r_th = pthread_create(&simulator_thread, NULL, simulator_worker, (void *)NULL);
+    if (pthread_create(&rtu_thread, NULL, rtu_worker, s))
+    {
+        printf("RTU thread creation failed.! %s\n", strerror(errno));
+        return 0;
+    }
+    if (pthread_create(&simulator_thread, NULL, simulator_worker, (void *)NULL))
+    {
+        printf("Simulator thread creation failed.! %s\n", strerror(errno));
+        return 0;
+    }
 
     pthread_join(rtu_thread, NULL);
     pthread_join(simulator_thread, NULL);
@@ -421,7 +422,6 @@ void *rtu_worker(void *ptr)
 
 void *simulator_worker(void *ptr)
 {
-    uint32_t counter = 0;
     for (;;)
     {
         mb_sim();
@@ -431,7 +431,6 @@ void *simulator_worker(void *ptr)
 void free_allocated_spaces(void)
 {
     mb_device_t *temp = HEAD;
-    mb_device_t *prev = NULL;
     while (temp != NULL)
     {
         HEAD = temp->nxt;
